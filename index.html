@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petal Relay — Flower Delivery Coordination</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rose:#c8486b;
+  --rose-deep:#9d2f50;
+  --leaf:#3f6b4e;
+  --leaf-soft:#e4efe6;
+  --cream:#fbf6f1;
+  --petal:#f7e4ea;
+  --ink:#2c2430;
+  --muted:#7a6f78;
+  --line:#ebdfe4;
+  --ok:#2f8a5b;
+  --amber:#c98a21;
+  --shadow:0 10px 30px rgba(120,40,70,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.6}
+h1,h2,h3,.disp{font-family:'Fraunces',serif;font-weight:600;line-height:1.15}
+a{color:var(--rose-deep)}
+img{max-width:100%}
+
+/* Header */
+header.top{position:sticky;top:0;z-index:50;background:rgba(251,246,241,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topwrap{max-width:1120px;margin:0 auto;padding:.7rem 1.1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.55rem;font-family:'Fraunces',serif;font-weight:700;font-size:1.2rem}
+.brand .mark{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--rose),var(--rose-deep));display:grid;place-items:center;color:#fff;font-size:1.1rem}
+nav.tabs{display:flex;gap:.25rem;margin-left:auto;flex-wrap:wrap}
+nav.tabs button{font:inherit;font-weight:600;font-size:.9rem;border:none;background:transparent;color:var(--muted);padding:.5rem .8rem;border-radius:9px;cursor:pointer;transition:.15s;min-height:40px}
+nav.tabs button:hover{background:var(--petal);color:var(--rose-deep)}
+nav.tabs button.active{background:var(--rose);color:#fff}
+
+/* Hero */
+.hero{max-width:1120px;margin:0 auto;padding:2.6rem 1.1rem 1.4rem;display:grid;grid-template-columns:1fr;gap:1.4rem}
+.hero .intro h1{font-size:2.5rem;letter-spacing:-.5px}
+.hero .intro p.lead{font-size:1.1rem;color:var(--muted);margin-top:.7rem;max-width:40ch}
+.hero .flowerart{background:linear-gradient(150deg,var(--petal),var(--leaf-soft));border-radius:22px;min-height:190px;display:grid;place-items:center;font-size:3.6rem;box-shadow:var(--shadow)}
+@media(min-width:860px){
+  .hero{grid-template-columns:1.15fr .85fr;align-items:center;padding-top:3.4rem}
+  .hero .intro h1{font-size:3.4rem}
+}
+
+/* Layout */
+main{max-width:1120px;margin:0 auto;padding:0 1.1rem 3rem}
+.panel{display:none}
+.panel.show{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.3rem;box-shadow:var(--shadow)}
+.card + .card{margin-top:1.1rem}
+.section-h{font-size:1.5rem;margin-bottom:.3rem}
+.section-sub{color:var(--muted);margin-bottom:1.2rem}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
+@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1rem;text-align:center}
+.stat .n{font-family:'Fraunces',serif;font-size:2rem;color:var(--rose-deep);line-height:1}
+.stat .l{font-size:.8rem;color:var(--muted);margin-top:.35rem;text-transform:uppercase;letter-spacing:.06em}
+
+/* Forms */
+label{display:block;font-weight:600;font-size:.88rem;margin:.75rem 0 .3rem}
+input,select,textarea{width:100%;font:inherit;padding:.7rem .8rem;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);min-height:44px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--rose)}
+textarea{min-height:80px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr;gap:0 1rem}
+@media(min-width:620px){.row2{grid-template-columns:1fr 1fr}}
+.check{display:flex;gap:.55rem;align-items:flex-start;margin-top:.9rem;font-size:.9rem;font-weight:500}
+.check input{width:20px;height:20px;min-height:20px;margin-top:.15rem;flex:0 0 auto}
+
+.btn{font:inherit;font-weight:600;border:none;border-radius:11px;padding:.8rem 1.3rem;cursor:pointer;min-height:46px;transition:.15s;display:inline-flex;align-items:center;gap:.45rem;justify-content:center}
+.btn.primary{background:var(--rose);color:#fff}
+.btn.primary:hover{background:var(--rose-deep)}
+.btn.ghost{background:var(--leaf-soft);color:var(--leaf)}
+.btn.ghost:hover{background:#d4e7d8}
+.btn.small{padding:.45rem .7rem;min-height:36px;font-size:.82rem;border-radius:9px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.gap{display:inline-block;border:1.5px dashed var(--rose);background:#fff3f6;color:var(--rose-deep);padding:.05rem .4rem;border-radius:6px;font-weight:600;font-size:.85em}
+
+/* list rows */
+.orow{border:1px solid var(--line);border-radius:13px;padding:.9rem 1rem;margin-top:.8rem;display:grid;gap:.5rem}
+.orow .head{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;flex-wrap:wrap}
+.orow .who{font-family:'Fraunces',serif;font-weight:600;font-size:1.08rem}
+.orow .meta{font-size:.86rem;color:var(--muted)}
+.badge{font-size:.72rem;font-weight:700;padding:.2rem .55rem;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.b-new{background:var(--petal);color:var(--rose-deep)}
+.b-assigned{background:#e7eefc;color:#2f55b0}
+.b-out{background:#fff0d8;color:var(--amber)}
+.b-delivered{background:var(--leaf-soft);color:var(--leaf)}
+.orow .actions{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.orow select{max-width:180px;min-height:40px}
+
+.empty{text-align:center;color:var(--muted);padding:2rem 1rem;font-style:italic}
+
+/* riders */
+.riders-grid{display:grid;grid-template-columns:1fr;gap:1rem}
+@media(min-width:720px){.riders-grid{grid-template-columns:repeat(2,1fr)}}
+.rider-card{border:1px solid var(--line);border-radius:14px;padding:1.1rem;background:linear-gradient(160deg,#fff,var(--cream))}
+.rider-card h3{display:flex;align-items:center;gap:.5rem;font-size:1.15rem}
+.rider-card .load{font-size:.85rem;color:var(--muted);margin:.3rem 0 .7rem}
+.rider-card input{margin-bottom:.4rem}
+.chip{display:inline-block;background:var(--petal);color:var(--rose-deep);padding:.2rem .6rem;border-radius:20px;font-size:.78rem;font-weight:600;margin:.15rem .3rem .15rem 0}
+
+/* save toast */
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink);color:#fff;padding:.7rem 1.2rem;border-radius:30px;font-size:.88rem;font-weight:600;box-shadow:var(--shadow);z-index:200;transition:.35s;display:flex;align-items:center;gap:.5rem}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* pay */
+[data-factory-pay]{margin-top:1rem}
+.factory-pay-item{display:flex;justify-content:space-between;align-items:center;gap:1rem;border:1px solid var(--line);border-radius:12px;padding:.9rem 1rem;margin-top:.7rem;background:#fff;flex-wrap:wrap}
+.factory-pay-name{font-weight:600;font-family:'Fraunces',serif}
+.factory-pay-price{color:var(--rose-deep);font-weight:700}
+.factory-pay-btn{background:var(--rose);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font:inherit;font-weight:600;cursor:pointer;min-height:44px}
+.factory-pay-btn:hover{background:var(--rose-deep)}
+
+/* owner lock */
+.lockbox{max-width:420px;margin:0 auto;text-align:center}
+table.contacts{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:1rem;display:block;overflow-x:auto}
+table.contacts th,table.contacts td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--line);white-space:nowrap}
+table.contacts th{font-weight:700;color:var(--muted);text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}
+
+/* how it works */
+.how{background:var(--leaf-soft);border-radius:18px;padding:1.6rem;margin-top:2rem}
+.how h2{font-size:1.4rem;color:var(--leaf);margin-bottom:.8rem}
+.how ol{padding-left:1.2rem;display:grid;gap:.5rem}
+.how li{padding-left:.3rem}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2rem 1rem 1rem}
+.hint{font-size:.82rem;color:var(--muted);margin-top:.4rem}
+.loading{display:inline-block;width:16px;height:16px;border:2px solid var(--petal);border-top-color:var(--rose);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script id="factory-store-sdk">
+window.factory=(function(){
+var K="5fabdb2e-0661-4252-95b1-7ec9891bd10d",U="https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/app-market",A="sb_publishable_sMTQKIeFgT1vwjHnU7Gexg_8CCmhtxs";
+function call(b){b.appKey=K;return fetch(U,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+A},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||("store "+r.status));return d;});});}
+var S={
+put:function(c,i,d){return call({op:"put",collection:c,id:String(i),data:d}).then(function(x){return x.doc?x.doc.data:null;});},
+get:function(c,i){return call({op:"get",collection:c,id:String(i)}).then(function(x){return x.doc?x.doc.data:null;});},
+list:function(c){return call({op:"list",collection:c}).then(function(x){return x.docs.map(function(d){return d.data;});});},
+remove:function(c,i){return call({op:"delete",collection:c,id:String(i)}).then(function(){return true;});},
+unlock:function(code){return call({op:"redeem",code:String(code)}).then(function(x){try{localStorage.setItem("factory_access",x.status);}catch(e){}return x.status;});},
+access:function(){try{return localStorage.getItem("factory_access")||"none";}catch(e){return "none";}}
+};
+var _c=null;try{var h=(location.hash||"").match(/factory_code=([a-z0-9-]+)/i);_c=h?h[1]:localStorage.getItem("factory_code");if(h){history.replaceState(null,"",location.pathname+location.search);}}catch(e){}
+var F={put:S.put,get:S.get,list:S.list,remove:S.remove,unlock:S.unlock,access:S.access};
+F.ready=_c?S.unlock(_c).then(function(s){try{if(s!=="invalid")localStorage.setItem("factory_code",_c);}catch(e){}return s;}).catch(function(){return S.access();}):Promise.resolve(S.access());
+return F;})();
+</script>
+<script id="factory-pay-sdk">
+(function(){var s=document.createElement("script");s.src="https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/app-pay?sdk=1&repo=build-me-an-pilb&v="+Math.floor(Date.now()/300000);s.async=true;document.head.appendChild(s);})();
+</script>
+</head>
+<body>
+
+<header class="top">
+  <div class="topwrap">
+    <div class="brand"><span class="mark">❀</span> Petal Relay</div>
+    <nav class="tabs" role="tablist">
+      <button class="active" data-tab="dash">Dashboard</button>
+      <button data-tab="orders">Orders</button>
+      <button data-tab="riders">Riders</button>
+      <button data-tab="sourcing">Sourcing</button>
+      <button data-tab="owner">Owner</button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="intro">
+    <h1>Fresh flowers, four riders, one calm hub.</h1>
+    <p class="lead">Petal Relay helps you take flower orders, share them fairly between your four bikers, and keep your stock topped up from the flower shop — all in one gentle, organised place.</p>
+  </div>
+  <div class="flowerart" role="img" aria-label="Illustration of a bouquet being carried by bicycle couriers">💐 🚲 🌷</div>
+</section>
+
+<main>
+
+<!-- DASHBOARD -->
+<section class="panel show" id="dash" role="tabpanel">
+  <div class="stats" id="statGrid">
+    <div class="stat"><div class="n" id="st-new">0</div><div class="l">New</div></div>
+    <div class="stat"><div class="n" id="st-prog">0</div><div class="l">In progress</div></div>
+    <div class="stat"><div class="n" id="st-done">0</div><div class="l">Delivered</div></div>
+    <div class="stat"><div class="n" id="st-low">0</div><div class="l">Stock to source</div></div>
+  </div>
+
+  <div class="card" style="margin-top:1.1rem">
+    <h2 class="section-h">Today at a glance</h2>
+    <p class="section-sub">Rider workloads for all orders that still need carrying.</p>
+    <div class="riders-grid" id="dashRiders"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-h">Sell a bouquet here</h2>
+    <p class="section-sub">Your listed bouquets and prices appear below. Customers pay securely through the Factory — no cards ever touch this app.</p>
+    <div data-factory-pay></div>
+  </div>
+</section>
+
+<!-- ORDERS -->
+<section class="panel" id="orders" role="tabpanel">
+  <div class="card">
+    <h2 class="section-h">New flower order</h2>
+    <p class="section-sub">Take the details, pick a bouquet, and assign a rider when you're ready.</p>
+    <form id="orderForm">
+      <div class="row2">
+        <div><label for="o-name">Customer name</label><input id="o-name" required autocomplete="name"></div>
+        <div><label for="o-phone">Customer phone</label><input id="o-phone" inputmode="tel" autocomplete="tel"></div>
+      </div>
+      <div class="row2">
+        <div><label for="o-email">Customer email</label><input id="o-email" type="email" autocomplete="email"></div>
+        <div><label for="o-bouquet">Bouquet / arrangement</label><input id="o-bouquet" placeholder="e.g. Dozen red roses" required></div>
+      </div>
+      <div class="row2">
+        <div><label for="o-qty">Quantity</label><input id="o-qty" type="number" min="1" value="1"></div>
+        <div><label for="o-rider">Assign rider (optional)</label><select id="o-rider"></select></div>
+      </div>
+      <label for="o-addr">Delivery address</label>
+      <input id="o-addr" placeholder="Street, town, postcode">
+      <label for="o-note">Notes (card message, time window)</label>
+      <textarea id="o-note" placeholder="Anything the rider should know"></textarea>
+      <label class="check"><input type="checkbox" id="o-consent"> <span>Tick to receive offers and news from us by email.</span></label>
+      <div style="margin-top:1rem"><button class="btn primary" type="submit">Save order</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap">
+      <h2 class="section-h">Order board</h2>
+      <select id="filterStatus" style="max-width:200px">
+        <option value="all">All orders</option>
+        <option value="New">New</option>
+        <option value="Assigned">Assigned</option>
+        <option value="Out for delivery">Out for delivery</option>
+        <option value="Delivered">Delivered</option>
+      </select>
+    </div>
+    <div id="orderList"></div>
+  </div>
+</section>
+
+<!-- RIDERS -->
+<section class="panel" id="riders" role="tabpanel">
+  <div class="card">
+    <h2 class="section-h">Your four riders</h2>
+    <p class="section-sub">Name each rider and see how many deliveries are on their plate. Balance the load so no one is overloaded.</p>
+    <div class="riders-grid" id="riderList"></div>
+    <p class="hint">Names save automatically as you type.</p>
+  </div>
+</section>
+
+<!-- SOURCING -->
+<section class="panel" id="sourcing" role="tabpanel">
+  <div class="card">
+    <h2 class="section-h">Source from the flower shop</h2>
+    <p class="section-sub">Log what you need to buy from the shop. Mark it received once it's in your hands.</p>
+    <form id="stockForm">
+      <div class="row2">
+        <div><label for="s-flower">Flower / item</label><input id="s-flower" placeholder="e.g. White lilies" required></div>
+        <div><label for="s-qty">Quantity to source</label><input id="s-qty" type="number" min="1" value="10" required></div>
+      </div>
+      <label for="s-note">Note (colour, grade, supplier)</label>
+      <input id="s-note" placeholder="Optional">
+      <div style="margin-top:1rem"><button class="btn primary" type="submit">Add to sourcing list</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 class="section-h">Find a flower shop near you</h2>
+    <p class="section-sub">Enter a postcode or town to discover nearby florists to source from.</p>
+    <div class="row2">
+      <div><label for="shopPostcode">Postcode or place</label><input id="shopPostcode" placeholder="e.g. SW1A 1AA"></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn ghost" id="findShops" style="width:100%">Search florists</button></div>
+    </div>
+    <div id="shopResults" style="margin-top:1rem"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-h">Sourcing list</h2>
+    <p class="section-sub">Flowers to buy and what's already arrived.</p>
+    <div id="stockList"></div>
+  </div>
+</section>
+
+<!-- OWNER -->
+<section class="panel" id="owner" role="tabpanel">
+  <div class="card" id="ownerLocked">
+    <div class="lockbox">
+      <h2 class="section-h">Owner area</h2>
+      <p class="section-sub" id="ownerPrompt">Set a private owner code to manage your customer list.</p>
+      <label for="ownerCode" class="sr">Owner code</label>
+      <input id="ownerCode" type="password" placeholder="Owner code" autocomplete="off">
+      <div style="margin-top:.9rem"><button class="btn primary" id="ownerBtn" style="width:100%">Continue</button></div>
+      <p class="hint" id="ownerHint"></p>
+    </div>
+  </div>
+
+  <div class="card" id="ownerPanel" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap">
+      <h2 class="section-h">Marketing contacts</h2>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn ghost small" id="exportContacts">⬇ Download consented CSV</button>
+        <button class="btn ghost small" id="ownerLock">Lock</button>
+      </div>
+    </div>
+    <p class="section-sub">Only customers who ticked the marketing box are included in the export.</p>
+    <div id="contactsBox"></div>
+  </div>
+</section>
+
+<div class="how">
+  <h2>How it works</h2>
+  <ol>
+    <li><strong>Take an order.</strong> In <em>Orders</em>, record the customer, the bouquet and the delivery address.</li>
+    <li><strong>Source your stock.</strong> In <em>Sourcing</em>, list what to buy from the flower shop and find nearby florists by postcode.</li>
+    <li><strong>Share it fairly.</strong> In <em>Riders</em>, name your four bikers; assign each order and watch the workloads stay balanced.</li>
+    <li><strong>Move it along.</strong> Advance each order from New → Assigned → Out for delivery → Delivered.</li>
+    <li><strong>Sell bouquets.</strong> Customers buy through the Pay panel on the Dashboard — payments go straight to your Factory account, no cards touch this app.</li>
+    <li><strong>Keep your list.</strong> Consented customers appear in the Owner area, ready to export as a CSV for your newsletter.</li>
+  </ol>
+  <p class="hint" style="color:var(--leaf)">Everything you enter is saved to your Petal Relay cloud and shared across every device that opens this app.</p>
+</div>
+
+<footer>Petal Relay — coordinating kindness, one bouquet at a time. 🌼</footer>
+</main>
+
+<div id="toast">✓ Saved</div>
+
+<script>
+/* ---------- Factory storage fallback (so the app runs anywhere) ---------- */
+const factory = window.factory || (function(){
+  const K='petalrelay_';
+  const read=c=>JSON.parse(localStorage.getItem(K+c)||'{}');
+  const write=(c,o)=>localStorage.setItem(K+c,JSON.stringify(o));
+  return {
+    async put(c,id,doc){const o=read(c);o[id]={...doc,id,_ts:Date.now()};write(c,o);return o[id];},
+    async get(c,id){return read(c)[id]||null;},
+    async list(c){return Object.values(read(c)).sort((a,b)=>(b._ts||0)-(a._ts||0));},
+    async remove(c,id){const o=read(c);delete o[id];write(c,o);},
+    ready:Promise.resolve('none'),access:()=>'none',async unlock(){return 'none';}
+  };
+})();
+
+const RIDERS=['r1','r2','r3','r4'];
+const STATUSES=['New','Assigned','Out for delivery','Delivered'];
+let orders=[], stock=[], riderNames={}, ownerCode=null;
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent='✓ '+msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1600);}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+    document.getElementById(b.dataset.tab).classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ---------- escaping ---------- */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function riderLabel(key){return (riderNames[key]&&riderNames[key].trim())?riderNames[key]:'Rider '+(RIDERS.indexOf(key)+1);}
+
+/* ---------- load ---------- */
+async function loadAll(){
+  const [o,s,set]=await Promise.all([factory.list('orders'),factory.list('stock'),factory.get('settings','config')]);
+  orders=o||[];stock=s||[];
+  if(set){riderNames=set.riderNames||{};ownerCode=set.ownerCode||null;}
+  renderRiderSelect();renderOrders();renderStock();renderRiders();renderDash();refreshOwnerPrompt();
+}
+async function saveSettings(){await factory.put('settings','config',{riderNames,ownerCode});}
+
+/* ---------- rider select in order form ---------- */
+function renderRiderSelect(){
+  const sel=document.getElementById('o-rider');
+  sel.innerHTML='<option value="">— Unassigned —</option>'+RIDERS.map(r=>`<option value="${r}">${esc(riderLabel(r))}</option>`).join('');
+}
+
+/* ---------- orders ---------- */
+document.getElementById('orderForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=e.target.querySelector('button[type=submit]');btn.disabled=true;
+  const id=String(Date.now());
+  const riderVal=document.getElementById('o-rider').value;
+  const doc={
+    id,customer:document.getElementById('o-name').value.trim(),
+    phone:document.getElementById('o-phone').value.trim(),
+    email:document.getElementById('o-email').value.trim(),
+    consent:document.getElementById('o-consent').checked,
+    bouquet:document.getElementById('o-bouquet').value.trim(),
+    qty:+document.getElementById('o-qty').value||1,
+    rider:riderVal,
+    addr:document.getElementById('o-addr').value.trim(),
+    note:document.getElementById('o-note').value.trim(),
+    status:riderVal?'Assigned':'New',
+    date:new Date().toISOString()
+  };
+  await factory.put('orders',id,doc);
+  e.target.reset();document.getElementById('o-qty').value=1;
+  btn.disabled=false;toast('Order saved');
+  await loadAll();
+  document.querySelector('nav.tabs button[data-tab="orders"]').classList.add('active');
+});
+
+document.getElementById('filterStatus').addEventListener('change',renderOrders);
+
+function renderOrders(){
+  const f=document.getElementById('filterStatus').value;
+  const box=document.getElementById('orderList');
+  let list=orders.slice();
+  if(f!=='all')list=list.filter(o=>o.status===f);
+  if(!list.length){box.innerHTML='<div class="empty">No orders here yet. Add one above to get started.</div>';return;}
+  box.innerHTML=list.map(o=>{
+    const cls={'New':'b-new','Assigned':'b-assigned','Out for delivery':'b-out','Delivered':'b-delivered'}[o.status];
+    const d=new Date(o.date).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+    const nextIdx=STATUSES.indexOf(o.status);
+    const next=STATUSES[nextIdx+1];
+    return `<div class="orow">
+      <div class="head">
+        <div>
+          <div class="who">${esc(o.bouquet)} ${o.qty>1?`<span class="chip">×${o.qty}</span>`:''}</div>
+          <div class="meta">${esc(o.customer)}${o.phone?' · '+esc(o.phone):''} · ${d}</div>
+          ${o.addr?`<div class="meta">📍 ${esc(o.addr)}</div>`:''}
+          ${o.note?`<div class="meta">📝 ${esc(o.note)}</div>`:''}
+        </div>
+        <span class="badge ${cls}">${esc(o.status)}</span>
+      </div>
+      <div class="actions">
+        <label style="margin:0;font-weight:500;font-size:.8rem;color:var(--muted)">Rider:</label>
+        <select data-assign="${o.id}">
+          <option value="">Unassigned</option>
+          ${RIDERS.map(r=>`<option value="${r}" ${o.rider===r?'selected':''}>${esc(riderLabel(r))}</option>`).join('')}
+        </select>
+        ${next?`<button class="btn ghost small" data-next="${o.id}">→ ${esc(next)}</button>`:''}
+        <button class="btn small" style="background:#f6e6ea;color:var(--rose-deep)" data-del="${o.id}">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  box.querySelectorAll('[data-assign]').forEach(sel=>sel.addEventListener('change',async e=>{
+    const o=orders.find(x=>x.id===e.target.dataset.assign);
+    o.rider=e.target.value;
+    if(e.target.value&&o.status==='New')o.status='Assigned';
+    if(!e.target.value&&o.status==='Assigned')o.status='New';
+    await factory.put('orders',o.id,o);toast('Rider updated');await loadAll();
+  }));
+  box.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',async()=>{
+    const o=orders.find(x=>x.id===b.dataset.next);
+    const i=STATUSES.indexOf(o.status);
+    if(i<STATUSES.length-1)o.status=STATUSES[i+1];
+    if(o.status!=='New'&&!o.rider&&o.status==='Assigned'){}
+    await factory.put('orders',o.id,o);toast('Moved to '+o.status);await loadAll();
+  }));
+  box.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{
+    if(!confirm('Delete this order?'))return;
+    await factory.remove('orders',b.dataset.del);toast('Order deleted');await loadAll();
+  }));
+}
+
+/* ---------- riders ---------- */
+function activeLoad(key){return orders.filter(o=>o.rider===key&&o.status!=='Delivered').length;}
+function renderRiders(){
+  const box=document.getElementById('riderList');
+  box.innerHTML=RIDERS.map((r,i)=>{
+    const load=activeLoad(r);
+    const theirs=orders.filter(o=>o.rider===r&&o.status!=='Delivered');
+    return `<div class="rider-card">
+      <h3>🚲 Rider ${i+1}</h3>
+      <label for="rn-${r}">Name</label>
+      <input id="rn-${r}" data-rname="${r}" value="${esc(riderNames[r]||'')}" placeholder="[ADD RIDER NAME]">
+      <div class="load"><strong>${load}</strong> active ${load===1?'delivery':'deliveries'}</div>
+      ${theirs.length?theirs.map(o=>`<span class="chip">${esc(o.bouquet)}</span>`).join(''):'<span class="hint">No active deliveries.</span>'}
+    </div>`;
+  }).join('');
+  box.querySelectorAll('[data-rname]').forEach(inp=>{
+    inp.addEventListener('input',()=>{riderNames[inp.dataset.rname]=inp.value;});
+    inp.addEventListener('change',async()=>{await saveSettings();renderRiderSelect();renderOrders();renderDash();toast('Name saved');});
+  });
+}
+function renderDash(){
+  document.getElementById('st-new').textContent=orders.filter(o=>o.status==='New').length;
+  document.getElementById('st-prog').textContent=orders.filter(o=>o.status==='Assigned'||o.status==='Out for delivery').length;
+  document.getElementById('st-done').textContent=orders.filter(o=>o.status==='Delivered').length;
+  document.getElementById('st-low').textContent=stock.filter(s=>s.status!=='Received').length;
+  const box=document.getElementById('dashRiders');
+  box.innerHTML=RIDERS.map((r,i)=>{
+    const load=activeLoad(r);
+    return `<div class="rider-card">
+      <h3>🚲 ${esc(riderLabel(r))}</h3>
+      <div class="load"><strong>${load}</strong> active ${load===1?'delivery':'deliveries'}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- stock / sourcing ---------- */
+document.getElementById('stockForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const id=String(Date.now());
+  const doc={id,flower:document.getElementById('s-flower').value.trim(),qty:+document.getElementById('s-qty').value||1,
+    note:document.getElementById('s-note').value.trim(),status:'To source',date:new Date().toISOString()};
+  await factory.put('stock',id,doc);
+  e.target.reset();document.getElementById('s-qty').value=10;
+  toast('Added to sourcing list');await loadAll();
+});
+function renderStock(){
+  const box=document.getElementById('stockList');
+  if(!stock.length){box.innerHTML='<div class="empty">Nothing to source yet. Add flowers above.</div>';return;}
+  box.innerHTML=stock.map(s=>{
+    const done=s.status==='Received';
+    return `<div class="orow">
+      <div class="head">
+        <div>
+          <div class="who">${esc(s.flower)} <span class="chip">×${s.qty}</span></div>
+          ${s.note?`<div class="meta">${esc(s.note)}</div>`:''}
+        </div>
+        <span class="badge ${done?'b-delivered':'b-new'}">${esc(s.status)}</span>
+      </div>
+      <div class="actions">
+        ${done?`<button class="btn ghost small" data-reset="${s.id}">Mark to source</button>`:`<button class="btn ghost small" data-recv="${s.id}">✓ Received</button>`}
+        <button class="btn small" style="background:#f6e6ea;color:var(--rose-deep)" data-sdel="${s.id}">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('[data-recv]').forEach(b=>b.addEventListener('click',async()=>{
+    const s=stock.find(x=>x.id===b.dataset.recv);s.status='Received';await factory.put('stock',s.id,s);toast('Marked received');await loadAll();}));
+  box.querySelectorAll('[data-reset]').forEach(b=>b.addEventListener('click',async()=>{
+    const s=stock.find(x=>x.id===b.dataset.reset);s.status='To source';await factory.put('stock',s.id,s);toast('Updated');await loadAll();}));
+  box.querySelectorAll('[data-sdel]').forEach(b=>b.addEventListener('click',async()=>{
+    if(!confirm('Delete this item?'))return;await factory.remove('stock',b.dataset.sdel);toast('Deleted');await loadAll();}));
+}
+
+/* ---------- find florists ---------- */
+document.getElementById('findShops').addEventListener('click',async()=>{
+  const q=document.getElementById('shopPostcode').value.trim();
+  const box=document.getElementById('shopResults');
+  if(!q){box.innerHTML='<p class="hint">Enter a postcode or town first.</p>';return;}
+  box.innerHTML='<p class="hint"><span class="loading"></span> Searching for florists near '+esc(q)+'…</p>';
+  try{
+    const g=await (await fetch("https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/places-desk",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({op:"geocode",q})})).json();
+    if(!g.ok)throw new Error('geo');
+    const n=await (await fetch("https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/places-desk",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({op:"nearby",lat:g.lat,lon:g.lon,kind:"florist",radius:5000,prefer:"osm"})})).json();
+    if(!n.ok)throw new Error('near');
+    window._shops=n.places||[];
+    if(!window._shops.length){box.innerHTML='<p class="hint">No florists found near '+esc(g.display||q)+'. Try a nearby town.</p>';return;}
+    box.innerHTML=`<p class="hint">Near ${esc(g.display||q)} — ${window._shops.length} florists found. <button class="btn ghost small" id="expShops" style="margin-left:.4rem">⬇ Export list (CSV)</button></p>`+
+      window._shops.map(p=>`<div class="orow"><div class="head"><div>
+        <div class="who">🌸 ${esc(p.name||'Florist')}</div>
+        ${p.address?`<div class="meta">📍 ${esc(p.address)}</div>`:''}
+        ${p.phone?`<div class="meta">☎ ${esc(p.phone)}</div>`:''}
+        ${p.website?`<div class="meta"><a href="${esc(p.website)}" target="_blank" rel="noopener">Website</a></div>`:''}
+      </div></div></div>`).join('');
+    document.getElementById('expShops').addEventListener('click',exportShops);
+  }catch(err){
+    box.innerHTML='<p class="hint">Sorry, we couldn\'t reach the florist finder just now. <button class="btn ghost small" onclick="document.getElementById(\'findShops\').click()">Retry</button></p>';
+  }
+});
+function exportShops(){
+  const rows=[['Name','Address','Phone','Website']];
+  (window._shops||[]).forEach(p=>rows.push([p.name||'',p.address||'',p.phone||'',p.website||'']));
+  rows.push(['Data © OpenStreetMap contributors (ODbL)','','','']);
+  downloadCSV(rows,'florists.csv');
+}
+
+/* ---------- CSV helper ---------- */
+function downloadCSV(rows,name){
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=name;a.click();URL.revokeObjectURL(a.href);
+}
+
+/* ---------- owner area ---------- */
+function refreshOwnerPrompt(){
+  document.getElementById('ownerPrompt').textContent = ownerCode
+    ? 'Enter your owner code to manage your customer list.'
+    : 'Set a private owner code to protect and manage your customer list.';
+  document.getElementById('ownerBtn').textContent = ownerCode ? 'Unlock' : 'Set code';
+}
+document.getElementById('ownerBtn').addEventListener('click',async()=>{
+  const v=document.getElementById('ownerCode').value.trim();
+  const hint=document.getElementById('ownerHint');
+  if(!v){hint.textContent='Please enter a code.';return;}
+  if(!ownerCode){ownerCode=v;await saveSettings();hint.textContent='';openOwner();toast('Owner code set');}
+  else if(v===ownerCode){hint.textContent='';openOwner();}
+  else{hint.textContent='That code doesn\'t match. Try again.';}
+});
+document.getElementById('ownerLock').addEventListener('click',()=>{
+  document.getElementById('ownerPanel').style.display='none';
+  document.getElementById('ownerLocked').style.display='block';
+  document.getElementById('ownerCode').value='';
+});
+function openOwner(){
+  document.getElementById('ownerLocked').style.display='none';
+  document.getElementById('ownerPanel').style.display='block';
+  renderContacts();
+}
+function renderContacts(){
+  const box=document.getElementById('contactsBox');
+  const consented=orders.filter(o=>o.consent&&(o.email||o.phone));
+  if(!consented.length){box.innerHTML='<div class="empty">No consented contacts yet. They appear when a customer ticks the marketing box.</div>';return;}
+  box.innerHTML=`<table class="contacts"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Consent</th><th>Date</th></tr></thead><tbody>`+
+    consented.map(o=>`<tr><td>${esc(o.customer)}</td><td>${esc(o.email||'—')}</td><td>${esc(o.phone||'—')}</td><td>Yes</td><td>${new Date(o.date).toLocaleDateString()}</td></tr>`).join('')+
+    `</tbody></table><p class="hint">${consented.length} consented contact${consented.length>1?'s':''}.</p>`;
+}
+document.getElementById('exportContacts').addEventListener('click',()=>{
+  const consented=orders.filter(o=>o.consent&&(o.email||o.phone));
+  if(!consented.length){toast('No consented contacts');return;}
+  const rows=[['Name','Email','Phone','Consent','Date']];
+  consented.forEach(o=>rows.push([o.customer,o.email||'',o.phone||'','yes',new Date(o.date).toISOString().slice(0,10)]));
+  downloadCSV(rows,'petal-relay-contacts.csv');
+  toast('CSV downloaded');
+});
+
+/* ---------- init ---------- */
+loadAll();
+</script>
+<div id="factory-provenance" style="padding:14px 16px;text-align:center;font:11px/1.7 system-ui,sans-serif;color:#888;opacity:.85;">&#9874; Built with <a href="https://thefactory.refereeinnovations.com" style="color:#888;">The Factory</a> using third-party AI tools &#183; the app owner is responsible for its content &#183; Standard: UK law, aligned with the UN Universal Declaration of Human Rights &#183; <a href="https://thefactory.refereeinnovations.com/terms.html" style="color:#888;">Terms</a></div>
+</body>
+</html>
